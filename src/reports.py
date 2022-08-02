@@ -37,10 +37,7 @@ def Write (stuff):
 
 
 def Pct(a, b):
-    if b == 0:
-        return 0.0
-    else:
-        return (a*100.0)/b
+    return 0.0 if b == 0 else (a*100.0)/b
 
 #
 # HTML output support stuff.
@@ -223,11 +220,9 @@ def ReportByELChanged (elist, totalchanged):
 def CompareSOBs (h1, h2):
     return len (h2.signoffs) - len (h1.signoffs)
 
-def ReportBySOBs (hlist):
+def ReportBySOBs(hlist):
     hlist.sort (CompareSOBs)
-    totalsobs = 0
-    for h in hlist:
-        totalsobs += len (h.signoffs)
+    totalsobs = sum(len (h.signoffs) for h in hlist)
     count = reported = 0
     BeginReport ('Developers with the most signoffs (total %d)' % totalsobs)
     for h in hlist:
@@ -246,11 +241,9 @@ def ReportBySOBs (hlist):
 def CompareRevs (h1, h2):
     return len (h2.reviews) - len (h1.reviews)
 
-def ReportByRevs (hlist):
+def ReportByRevs(hlist):
     hlist.sort (CompareRevs)
-    totalrevs = 0
-    for h in hlist:
-        totalrevs += len (h.reviews)
+    totalrevs = sum(len (h.reviews) for h in hlist)
     count = reported = 0
     BeginReport ('Developers with the most reviews (total %d)' % totalrevs)
     for h in hlist:
@@ -266,11 +259,9 @@ def ReportByRevs (hlist):
 def CompareRevsEmpl (e1, e2):
     return len (e2.reviews) - len (e1.reviews)
 
-def ReportByRevsEmpl (elist):
+def ReportByRevsEmpl(elist):
     elist.sort (CompareRevsEmpl)
-    totalrevs = 0
-    for e in elist:
-        totalrevs += len (e.reviews)
+    totalrevs = sum(len (e.reviews) for e in elist)
     count = reported = 0
     BeginReport ('Top reviewers by employer (total %d)' % totalrevs)
     for e in elist:
@@ -289,11 +280,9 @@ def ReportByRevsEmpl (elist):
 def CompareTests (h1, h2):
     return len (h2.tested) - len (h1.tested)
 
-def ReportByTests (hlist):
+def ReportByTests(hlist):
     hlist.sort (CompareTests)
-    totaltests = 0
-    for h in hlist:
-        totaltests += len (h.tested)
+    totaltests = sum(len (h.tested) for h in hlist)
     count = reported = 0
     BeginReport ('Developers with the most test credits (total %d)' % totaltests)
     for h in hlist:
@@ -309,11 +298,9 @@ def ReportByTests (hlist):
 def CompareTestCred (h1, h2):
     return h2.testcred - h1.testcred
 
-def ReportByTestCreds (hlist):
+def ReportByTestCreds(hlist):
     hlist.sort (CompareTestCred)
-    totaltests = 0
-    for h in hlist:
-        totaltests += h.testcred
+    totaltests = sum(h.testcred for h in hlist)
     count = reported = 0
     BeginReport ('Developers who gave the most tested-by credits (total %d)' % totaltests)
     for h in hlist:
@@ -333,11 +320,9 @@ def ReportByTestCreds (hlist):
 def CompareReports (h1, h2):
     return len (h2.reports) - len (h1.reports)
 
-def ReportByReports (hlist):
+def ReportByReports(hlist):
     hlist.sort (CompareReports)
-    totalreps = 0
-    for h in hlist:
-        totalreps += len (h.reports)
+    totalreps = sum(len (h.reports) for h in hlist)
     count = reported = 0
     BeginReport ('Developers with the most report credits (total %d)' % totalreps)
     for h in hlist:
@@ -353,11 +338,9 @@ def ReportByReports (hlist):
 def CompareRepCred (h1, h2):
     return h2.repcred - h1.repcred
 
-def ReportByRepCreds (hlist):
+def ReportByRepCreds(hlist):
     hlist.sort (CompareRepCred)
-    totalreps = 0
-    for h in hlist:
-        totalreps += h.repcred
+    totalreps = sum(h.repcred for h in hlist)
     count = reported = 0
     BeginReport ('Developers who gave the most report credits (total %d)' % totalreps)
     for h in hlist:
@@ -372,14 +355,12 @@ def ReportByRepCreds (hlist):
 #
 # Versions.
 #
-def CompareVersionCounts (h1, h2):
+def CompareVersionCounts(h1, h2):
     if h1.versions and h2.versions:
         return len (h2.versions) - len (h1.versions)
     if h2.versions:
         return 1
-    if h1.versions:
-        return -1
-    return 0
+    return -1 if h1.versions else 0
 
 def MissedVersions (hv, allv):
     missed = [v for v in allv if v not in hv]
@@ -402,11 +383,9 @@ def ReportVersions (hlist):
 def CompareESOBs (e1, e2):
     return e2.sobs - e1.sobs
 
-def ReportByESOBs (elist):
+def ReportByESOBs(elist):
     elist.sort (CompareESOBs)
-    totalsobs = 0
-    for e in elist:
-        totalsobs += e.sobs
+    totalsobs = sum(e.sobs for e in elist)
     count = reported = 0
     BeginReport ('Employers with the most signoffs (total %d)' % totalsobs)
     for e in elist:
@@ -421,11 +400,9 @@ def ReportByESOBs (elist):
 def CompareHackers (e1, e2):
     return len (e2.hackers) - len (e1.hackers)
 
-def ReportByEHackers (elist):
+def ReportByEHackers(elist):
     elist.sort (CompareHackers)
-    totalhackers = 0
-    for e in elist:
-        totalhackers += len (e.hackers)
+    totalhackers = sum(len (e.hackers) for e in elist)
     count = reported = 0
     BeginReport ('Employers with the most hackers (total %d)' % totalhackers)
     for e in elist:
@@ -486,16 +463,15 @@ def ReportAll(hlist, cscount):
     ulist.sort(ComparePCount)
     count = 0
     BeginReport('All developers')
-    alldevsFile = open('alldevs.txt', 'w')
-    for h in ulist:
-        pcount = len(h.patches)
-        if pcount > 0:
-            ReportLine(h.full_name_with_aff(), pcount, (pcount*100.0)/cscount)
-            alldevsFile.write(email_encode('%s\t%d\n' % (h.full_name_with_aff_tabs(), pcount)))
-            count += 1
-        if count >= ListCount:
-            break
-    alldevsFile.close()
+    with open('alldevs.txt', 'w') as alldevsFile:
+        for h in ulist:
+            pcount = len(h.patches)
+            if pcount > 0:
+                ReportLine(h.full_name_with_aff(), pcount, (pcount*100.0)/cscount)
+                alldevsFile.write(email_encode('%s\t%d\n' % (h.full_name_with_aff_tabs(), pcount)))
+                count += 1
+            if count >= ListCount:
+                break
     EndReport()
 
 def ReportUnknowns(hlist, cscount):
@@ -507,16 +483,15 @@ def ReportUnknowns(hlist, cscount):
     ulist.sort(ComparePCount)
     count = 0
     BeginReport('Developers with unknown affiliation')
-    unknownsFile = open('unknowns.txt', 'w')
-    for h in ulist:
-        pcount = len(h.patches)
-        if pcount > 0:
-            ReportLine(h.full_name_with_aff(), pcount, (pcount*100.0)/cscount)
-            unknownsFile.write(email_encode('%s\t%d\n' % (h.full_name_with_aff_tabs(), pcount)))
-            count += 1
-        if count >= ListCount:
-            break
-    unknownsFile.close()
+    with open('unknowns.txt', 'w') as unknownsFile:
+        for h in ulist:
+            pcount = len(h.patches)
+            if pcount > 0:
+                ReportLine(h.full_name_with_aff(), pcount, (pcount*100.0)/cscount)
+                unknownsFile.write(email_encode('%s\t%d\n' % (h.full_name_with_aff_tabs(), pcount)))
+                count += 1
+            if count >= ListCount:
+                break
     EndReport()
 
 def ReportSelfs(hlist, cscount):

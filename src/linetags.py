@@ -63,23 +63,17 @@ def MapCommits():
 if len(sys.argv) != 2:
     sys.stderr.write('Usage: linetags directory\n')
     sys.exit(1)
-#
-# Grab the tags/version database.
-#
-dbf = open('committags.db', 'r')
-DB = pickle.load(dbf)
-dbf.close()
-
-out = open('linetags.out', 'w')
-os.chdir(sys.argv[1])
-files = os.popen('/usr/bin/find . -type f', 'r')
-for file in files.readlines():
-    if file.find('.git/') < 0:
-        GetCommitLines(file[:-1])
-MapCommits()
-# print TagLines
-tags = TagLines.keys()
-tags.sort()
-for tag in tags:
-    out.write('%s %d\n' % (tag, TagLines[tag]))
-out.close()
+with open('committags.db', 'r') as dbf:
+    DB = pickle.load(dbf)
+with open('linetags.out', 'w') as out:
+    os.chdir(sys.argv[1])
+    files = os.popen('/usr/bin/find . -type f', 'r')
+    for file in files.readlines():
+        if file.find('.git/') < 0:
+            GetCommitLines(file[:-1])
+    MapCommits()
+    # print TagLines
+    tags = TagLines.keys()
+    tags.sort()
+    for tag in tags:
+        out.write('%s %d\n' % (tag, TagLines[tag]))

@@ -70,7 +70,7 @@ def NormalizeURL(url):
     if url[-18:] == 'torvalds/linux-2.6':
         url += '.git'
     if url[:8] == '/pub/scm':
-        url = 'git://git.kernel.org' + url
+        url = f'git://git.kernel.org{url}'
     return url
 
 def LookupTree(url):
@@ -214,9 +214,7 @@ def BuildFlowTree():
     rootnode = FlowNode(Mainline)
     notree = Tree('[No tree]', '')
     for centry in CommitTrees.values():
-        path = centry.path
-        if not path:
-            path = [ notree ]
+        path = centry.path or [ notree ]
         FillFlowPath(path, rootnode)
     return rootnode
 
@@ -269,11 +267,9 @@ def GVTree(ftree):
 def GVNodeName(treename):
     sname = treename.split('/')
     if treename.find('kernel.org') >= 0:
-        return '%s/%s' % (sname[-2], sname[-1])
+        return f'{sname[-2]}/{sname[-1]}'
     sep = treename.find ('://')
-    if sep > 0:
-        return treename[sep+3:]
-    return treename
+    return treename[sep+3:] if sep > 0 else treename
 
 def GVSort(n1, n2):
     return n2.commits - n1.commits
@@ -287,8 +283,7 @@ def GVPrintNode(gvf, node, parent):
     elif MainlineCommits/node.commits < 100:
         gvf.write(', color = orange');
     gvf.write(']\n')
-    inputs = node.inputs.values()
-    if inputs:
+    if inputs := node.inputs.values():
         inputs.sort(GVSort)
         for input in inputs:
             GVPrintNode(gvf, input, name)

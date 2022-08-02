@@ -23,34 +23,30 @@ _pemail = r'\s+"?([^<"]+)"?\s<([^>]+)>' # just email addr + name
 patterns = {
     'email_encode': re.compile(r'[^\s@]+@[^\s@]+'),
     'email_decode': re.compile(r'[^\s!]+![^\s!]+'),
-    'tagcommit': re.compile (r'^commit ([\da-f]+) .*tag: (v[0-9]\.\d(\.\d\d?)?)'),  # LG: allow versions v[0-9].n[...]
-    'commit': re.compile (r'^commit ([0-9a-f ]+)'),
-    'author': re.compile (r'^Author:' + _pemail + '$', re.I),
-    'date': re.compile (r'^Date: '),
-    'signed-off-by': re.compile (r'^\s+Signed-off-by:' + _pemail + '.*$', re.I),
-    'merge': re.compile (r'^Merge:.*$'),
-    'add': re.compile (r'^\+[^+].*$'),
-    'rem': re.compile (r'^-[^-].*$'),
-    'date': re.compile (r'^(Commit)?Date:\s+(.*)$'),
-    # filea, fileb are used only in 'parche mode' (-p)
-    'filea': re.compile (r'^---\s+(.*)$'),
-    'fileb': re.compile (r'^\+\+\+\s+(.*)$'),
-    'reviewed-by': re.compile (r'^\s+Reviewed-by:' + _pemail+ '.*$', re.I),
-    'tested-by': re.compile (r'^\s+tested-by:' + _pemail + '.*$', re.I),
-    'reported-by': re.compile (r'^\s+Reported-by:' + _pemail + '.*$', re.I),
-    'reported-and-tested-by': re.compile (r'^\s+reported-and-tested-by:' + _pemail + '.*$', re.I),
-    #
-    # Merges are described with a variety of lines.
-    #
+    'tagcommit': re.compile(
+        r'^commit ([\da-f]+) .*tag: (v[0-9]\.\d(\.\d\d?)?)'
+    ),
+    'commit': re.compile(r'^commit ([0-9a-f ]+)'),
+    'author': re.compile(f'^Author:{_pemail}$', re.I),
+    'date': re.compile(r'^Date: '),
+    'signed-off-by': re.compile(r'^\s+Signed-off-by:' + _pemail + '.*$', re.I),
+    'merge': re.compile(r'^Merge:.*$'),
+    'add': re.compile(r'^\+[^+].*$'),
+    'rem': re.compile(r'^-[^-].*$'),
+    'date': re.compile(r'^(Commit)?Date:\s+(.*)$'),
+    'filea': re.compile(r'^---\s+(.*)$'),
+    'fileb': re.compile(r'^\+\+\+\s+(.*)$'),
+    'reviewed-by': re.compile(r'^\s+Reviewed-by:' + _pemail + '.*$', re.I),
+    'tested-by': re.compile(r'^\s+tested-by:' + _pemail + '.*$', re.I),
+    'reported-by': re.compile(r'^\s+Reported-by:' + _pemail + '.*$', re.I),
+    'reported-and-tested-by': re.compile(
+        r'^\s+reported-and-tested-by:' + _pemail + '.*$', re.I
+    ),
     'ExtMerge': re.compile(r'^ +Merge( branch .* of)? ([^ ]+:[^ ]+)\n$'),
     'IntMerge': re.compile(r'^ +(Merge|Pull) .* into .*$'),
-    # PIntMerge2 = re.compile(r"^ +Merge branch(es)? '.*$"),
     'IntMerge2': re.compile(r"^ +Merge .*$"),
-    # Another way to get the statistics (per file).
-    # It implies --numstat
     'numstat': re.compile('^(\d+|-)\s+(\d+|-)\s+(.*)$'),
-    'rename' : re.compile('(.*)\{(.*) => (.*)\}(.*)'),
-    # Detect errors on svn conversions
+    'rename': re.compile('(.*)\{(.*) => (.*)\}(.*)'),
     'svn-tag': re.compile("^svn path=/tags/(.*)/?; revision=([0-9]+)$"),
 }
 

@@ -20,14 +20,14 @@ class CSVStat:
 
 PeriodCommitHash = { }
 
-def AccumulatePatch (p, Aggregate):
+def AccumulatePatch(p, Aggregate):
     if (Aggregate == 'week'):
         date = "%.2d-%.2d"%(p.date.isocalendar()[0], p.date.isocalendar()[1])
     elif (Aggregate == 'year'):
         date = "%.2d"%(p.date.year)
     else:
         date = "%.2d-%.2d-01"%(p.date.year, p.date.month)
-    authdatekey = "%s-%s"%(p.author.name, date)
+    authdatekey = f"{p.author.name}-{date}"
     if authdatekey not in PeriodCommitHash:
         empl = p.author.emailemployer (p.email, p.date)
         stat = CSVStat (p.author.name, p.email, empl, date)
@@ -40,26 +40,27 @@ ChangeSets = []
 FileTypes = []
 
 def store_patch(patch):
-    if not patch.merge:
-        employer = patch.author.emailemployer(patch.email, patch.date)
-        employer = employer.name.replace('"', '.').replace ('\\', '.')
-        author = patch.author.name.replace ('"', '.').replace ('\\', '.')
-        author = email_encode(patch.author.name.replace ("'", '.'))
-        try:
-            domain = patch.email.split('@')[1]
-        except:
-            domain = patch.email
-        ChangeSets.append([patch.commit, str(patch.date),
-                           email_encode(patch.email), domain, author, employer,
-                           patch.added, patch.removed, max(patch.added, patch.removed)])
-        for (filetype, (added, removed)) in patch.filetypes.iteritems():
-            FileTypes.append([patch.commit, filetype, added, removed])
+    if patch.merge:
+        return
+    employer = patch.author.emailemployer(patch.email, patch.date)
+    employer = employer.name.replace('"', '.').replace ('\\', '.')
+    author = patch.author.name.replace ('"', '.').replace ('\\', '.')
+    author = email_encode(patch.author.name.replace ("'", '.'))
+    try:
+        domain = patch.email.split('@')[1]
+    except:
+        domain = patch.email
+    ChangeSets.append([patch.commit, str(patch.date),
+                       email_encode(patch.email), domain, author, employer,
+                       patch.added, patch.removed, max(patch.added, patch.removed)])
+    for (filetype, (added, removed)) in patch.filetypes.iteritems():
+        FileTypes.append([patch.commit, filetype, added, removed])
 
 
-def save_csv (prefix='data'):
+def save_csv(prefix='data'):
     # Dump the ChangeSets
     if len(ChangeSets) > 0:
-        fd = open('%s-changesets.csv' % prefix, 'w')
+        fd = open(f'{prefix}-changesets.csv', 'w')
         writer = csv.writer (fd, quoting=csv.QUOTE_NONNUMERIC)
         writer.writerow (['Commit', 'Date', 'Domain',
                           'Email', 'Name', 'Affliation',
@@ -69,7 +70,7 @@ def save_csv (prefix='data'):
 
     # Dump the file types
     if len(FileTypes) > 0:
-        fd = open('%s-filetypes.csv' % prefix, 'w')
+        fd = open(f'{prefix}-filetypes.csv', 'w')
         writer = csv.writer (fd, quoting=csv.QUOTE_NONNUMERIC)
 
         writer.writerow (['Commit', 'Type', 'Added', 'Removed'])

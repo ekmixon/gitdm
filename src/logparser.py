@@ -58,12 +58,11 @@ class LogPatchSplitter:
         arr2 = []
         for i in range(len(arr) - 1):
             s = arr[i]
-            if s != '' and s != 'Date:':
+            if s not in ['', 'Date:']:
                 arr2.append(s)
         datestr = ' '.join(arr2)
-        date = datetime.datetime.strptime(datestr, '%a %b %d %H:%M:%S %Y')
         # print "DATE: " + str(date) + ", FROM: " + datestr
-        return date
+        return datetime.datetime.strptime(datestr, '%a %b %d %H:%M:%S %Y')
 
     def __grab_patch__(self):
         """
@@ -75,8 +74,7 @@ class LogPatchSplitter:
         line = self.buffer or self.fd.readline()
 
         while line:
-            m = patterns['commit'].match(line)
-            if m:
+            if m := patterns['commit'].match(line):
                 patch = [line]
                 break
             line = self.fd.readline()
@@ -84,15 +82,11 @@ class LogPatchSplitter:
         if not line:
             return None
 
-        line = self.fd.readline()
-        while line:
-            # If this line starts a new commit, drop out.
-            m = patterns['commit'].match(line)
-            if m:
+        while line := self.fd.readline():
+            if m := patterns['commit'].match(line):
                 self.buffer = line
                 break
-            m = patterns['date'].match(line)
-            if m:
+            if m := patterns['date'].match(line):
                 date = self.getDate(line)
                 if date < self.date_from or date > self.date_to:
                     # print "Date " + str(date) + ", not in [" + str(self.date_from) + " - " + str(self.date_to) + "]"
@@ -100,8 +94,6 @@ class LogPatchSplitter:
 
             patch.append(line)
             self.buffer = None
-            line = self.fd.readline()
-
         return patch
 
 

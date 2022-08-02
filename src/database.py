@@ -15,7 +15,7 @@ import csv
 from patterns import email_encode
 
 class Hacker:
-    def __init__ (self, name, id, elist, email):
+    def __init__(self, name, id, elist, email):
         self.name = name
         self.id = id
         self.employer = [ elist ]
@@ -29,16 +29,13 @@ class Hacker:
         self.bugsfixed = [ ]
         self.testcred = self.repcred = 0
         self.versions = [ ]
-        if elist[0][2]:
-            self.source = 'domain'
-        else:
-            self.source = 'config'
+        self.source = 'domain' if elist[0][2] else 'config'
 
     def full_name(self):
-        return self.email[0] + ' ' + self.name
+        return f'{self.email[0]} {self.name}'
 
     def full_name_with_aff(self):
-        return self.employer[0][0][1].name + ' ' + self.email[0] + ' ' + self.name
+        return f'{self.employer[0][0][1].name} {self.email[0]} {self.name}'
 
     def full_name_with_aff_tabs(self):
         return self.employer[0][0][1].name + '\t' + self.email[0] + '\t' + self.name
@@ -128,7 +125,7 @@ def LookupID (id):
         return None
 
 def ReverseAlias(email):
-    if not email in EmailAliases.values():
+    if email not in EmailAliases.values():
         return []
     return [em_key for em_key, em_val in EmailAliases.items() if em_val == email and em_key != email]
 
@@ -194,7 +191,7 @@ def AllHackers ():
     return HackersByID.values ()
 #    return [h for h in HackersByID.values ()] #  if (h.added + h.removed) > 0]
 
-def DumpDB ():
+def DumpDB():
     out = open ('database.dump', 'w')
     names = HackersByName.keys ()
     names.sort ()
@@ -204,7 +201,7 @@ def DumpDB ():
                                                         len (h.patches),
                                                         h.added, h.removed,
                                                         len (h.signoffs)))
-        for i in range (0, len (h.email)):
+        for i in range(len (h.email)):
             out.write ('\t%s -> \n' % (email_encode(h.email[i])))
             for date, empl, dom in h.employer[i]:
                 out.write ('\t\t %d-%d-%d %s\n' % (date.year, date.month, date.day,
@@ -395,8 +392,11 @@ def AddEmailEmployerMapping (email, employer, end = nextyear, domain = False):
 # LG: Artificial Domains from Hacker's email domain names
 ArtificialDomains = {}
 def GetHackerDomain(dom, email):
-    new_dom = ''.join(map(lambda x: x.lower().capitalize(), dom.split('.')[:-1]))
-    new_dom += ' *'
+    new_dom = (
+        ''.join(map(lambda x: x.lower().capitalize(), dom.split('.')[:-1]))
+        + ' *'
+    )
+
     key = (new_dom, dom)
     if key not in ArtificialDomains:
         ArtificialDomains[key] = [email]
@@ -439,7 +439,6 @@ def MapToEmployer (email, unknown = 0):
         print "Unsupported unknown parameter handling value"
 
 
-def LookupEmployer (email, mapunknown = 0):
-    elist = MapToEmployer (email, mapunknown)
-    return elist # GetEmployer (ename)
+def LookupEmployer(email, mapunknown = 0):
+    return MapToEmployer (email, mapunknown)
 

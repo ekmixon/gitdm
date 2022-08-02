@@ -33,16 +33,12 @@ commit = re.compile(r'^commit ([\da-f]+)')
 for line in input.readlines():
     if not line.startswith('commit'):
         continue  # This makes it go faster
-    m = tagline.search(line)
-    if m:
-        DB[m.group(1)] = Tag = m.group(2)
+    if m := tagline.search(line):
+        DB[m[1]] = Tag = m[2]
         Tags += 1
-    else:
-        m = commit.search(line)
-        if m:
-            DB[m.group(1)] = Tag
+    elif m := commit.search(line):
+        DB[m[1]] = Tag
 
-print 'Found %d commits, %d tags' % (len(DB.keys()), Tags)
-out = open('committags.db', 'w')
-pickle.dump(DB, out)
-out.close()
+import sys
+with open('committags.db', 'w') as out:
+    pickle.dump(DB, out)

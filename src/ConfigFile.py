@@ -18,16 +18,14 @@ from patterns import patterns, email_decode
 #
 # Read a line and strip out junk.
 #
-def ReadConfigLine (file):
+def ReadConfigLine(file):
     line = file.readline ()
     if not line:
         return None
     line = line.split('#')[0] # Get rid of any comments
     line = line.strip () # and extra white space
     line = email_decode(line)
-    if len (line) == 0: # we got rid of everything
-        return ReadConfigLine (file)
-    return line
+    return ReadConfigLine (file) if len (line) == 0 else line
 
 #
 # Give up and die.
@@ -39,37 +37,33 @@ def croak (message):
 #
 # Read a list of email aliases.
 #
-def ReadEmailAliases (name):
+def ReadEmailAliases(name):
     try:
         file = open (name, 'r')
     except IOError:
-        croak ('Unable to open email alias file %s' % (name))
-    line = ReadConfigLine (file)
-    while line:
+        croak(f'Unable to open email alias file {name}')
+    while line := ReadConfigLine(file):
         m = re.match ('^("[^"]+"|\S+)\s+(.+)$', line)
         if not m or len (m.groups ()) != 2:
             croak ('Funky email alias line "%s"' % (line))
-        if m and m.group (2).find ('@') <= 0:
+        if m and m[2].find('@') <= 0:
             croak ('Non-addresses in email alias "%s"' % (line))
-        database.AddEmailAlias (m.group (1).replace ('"', ''), m.group (2))
-        line = ReadConfigLine (file)
+        database.AddEmailAlias(m[1].replace('"', ''), m[2])
     file.close ()
 
 #
 # Read a list of company mapping
 #
-def ReadCompanyMap (name):
+def ReadCompanyMap(name):
     try:
         file = open (name, 'r')
     except IOError:
-        croak ('Unable to open company mapping file %s' % (name))
-    line = ReadConfigLine (file)
-    while line:
+        croak(f'Unable to open company mapping file {name}')
+    while line := ReadConfigLine(file):
         m = re.match ('^`(.+)`\s+`(.+)`$', line)
         if not m or len (m.groups ()) != 2:
             croak ('Funky company mapping "%s"' % (line))
-        database.AddCompanyMap (m.group(1), m.group (2))
-        line = ReadConfigLine (file)
+        database.AddCompanyMap(m[1], m[2])
     file.close ()
 
 #
@@ -77,13 +71,12 @@ def ReadCompanyMap (name):
 #
 EMMpat = re.compile (r'^([^\s]+)\s+([^<]+)\s*(<\s*(\d+-\d+-\d+)\s*)?$')
 
-def ReadEmailEmployers (name, domain):
+def ReadEmailEmployers(name, domain):
     try:
         file = open (name, 'r')
     except IOError:
-        croak ('Unable to open email/employer file %s' % (name))
-    line = ReadConfigLine (file)
-    while line:
+        croak(f'Unable to open email/employer file {name}')
+    while line := ReadConfigLine(file):
         m = EMMpat.match (line)
         if not m:
             croak ('Funky email/employer line "%s"' % (line))
@@ -91,7 +84,6 @@ def ReadEmailEmployers (name, domain):
         company = m.group (2).strip ()
         enddate = ParseDate (m.group (4))
         database.AddEmailEmployerMapping (email, company, enddate, domain)
-        line = ReadConfigLine (file)
     file.close ()
 
 def ParseDate (cdate):
@@ -101,24 +93,21 @@ def ParseDate (cdate):
     return datetime.date (int (sdate[0]), int (sdate[1]), int (sdate[2]))
 
 
-def ReadGroupMap (fname, employer):
+def ReadGroupMap(fname, employer):
     try:
         file = open (fname, 'r')
     except IOError:
-        croak ('Unable to open group map file %s' % (fname))
-    line = ReadConfigLine (file)
-    while line:
+        croak(f'Unable to open group map file {fname}')
+    while line := ReadConfigLine(file):
         database.AddEmailEmployerMapping (line, employer)
-        line = ReadConfigLine (file)
     file.close ()
 
 #
 # Read in a virtual employer description.
 #
-def ReadVirtual (file, name):
+def ReadVirtual(file, name):
     ve = database.VirtualEmployer (name)
-    line = ReadConfigLine (file)
-    while line:
+    while line := ReadConfigLine(file):
         sl = line.split (None, 1)
         first = sl[0]
         if first == 'end':
@@ -136,7 +125,6 @@ def ReadVirtual (file, name):
         if not (0 < percent <= 100):
             croak ('Bad split value "%s" for virtual empl %s' % (first, name))
         ve.addsplit (' '.join (sl[1:]), percent/100.0)
-        line = ReadConfigLine (file)
     #
     # We should never get here
     #
@@ -183,13 +171,12 @@ def ReadFileType (filename):
 # Read an overall config file.
 #
 
-def ConfigFile (name, confdir):
+def ConfigFile(name, confdir):
     try:
         file = open (confdir + name, 'r')
     except IOError:
-        croak ('Unable to open config file %s' % (confdir + name))
-    line = ReadConfigLine (file)
-    while line:
+        croak(f'Unable to open config file {confdir + name}')
+    while line := ReadConfigLine(file):
         sline = line.split (None, 2)
         if len (sline) < 2:
             croak ('Funky config line: "%s"' % (line))
@@ -212,5 +199,4 @@ def ConfigFile (name, confdir):
             database.FileTypes = database.FileType (patterns, order)
         else:
             croak ('Unrecognized config line: "%s"' % (line))
-        line = ReadConfigLine (file)
         

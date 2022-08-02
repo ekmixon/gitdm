@@ -66,14 +66,12 @@ def ParseOpts ():
         elif opt[0] == '-z':
             DumpDB = 1
 
-def LookupStoreHacker (date, name, email):
+def LookupStoreHacker(date, name, email):
     email = database.RemapEmail (email)
-    h = database.LookupEmail (email)
-    if h: # already there
+    if h := database.LookupEmail(email):
         return date, h
     elist = database.LookupEmployer (email, MapUnknown)
-    h = database.LookupName (name)
-    if h: # new email
+    if h := database.LookupName(name):
         h.addemail (email, elist)
         return date, h
     return date, database.StoreHacker(name, elist, email)

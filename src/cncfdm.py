@@ -251,9 +251,7 @@ unknowns = {
     'gmail.com', 'hotmail.co.uk', 'toph.ca', 'yandex.com', 'moscar.net', 'bedafamily.com', 'ebay.com', 'hotmail.com', 'yahoo.com', 'qq.com', 'zju.edu.cn',
     'outlook.com', 
 }
-unknown_domains = {}
-for unknown in unknowns:
-    unknown_domains[unknown] = []
+unknown_domains = {unknown: [] for unknown in unknowns}
 
 def LookupStoreHacker (name, email):
     email = database.RemapEmail (email)
@@ -372,39 +370,37 @@ def parse_numstat(line, file_filter):
     """
     m = patterns['numstat'].match (line)
     ns['n'] += 1
-    if m:
-        if 'numstat' not in ns:
-            ns['numstat'] = 1
-        else:
-            ns['numstat'] += 1
-
-        filename = m.group (3)
-        # If we have a file filter, check for file lines.
-        if file_filter:
-            match = not not file_filter.search(filename)
-            # print(filename)
-            if match == InvertFilter:
-                return None, None, None, None
-
-        try:
-            added = int (m.group (1))
-            removed = int (m.group (2))
-        except ValueError:
-            # A binary file (image, etc.) is marked with '-'
-            added = removed = 0
-
-        m = patterns['rename'].match (filename)
-        if m:
-            filename = '%s%s%s' % (m.group (1), m.group (3), m.group (4))
-            if 'rename' not in ns:
-                ns['rename'] = 1
-            else:
-                ns['rename'] += 1
-
-        filetype = database.FileTypes.guess_file_type (os.path.basename(filename))
-        return filename, filetype, added, removed
-    else:
+    if not m:
         return None, None, None, None
+    if 'numstat' not in ns:
+        ns['numstat'] = 1
+    else:
+        ns['numstat'] += 1
+
+    filename = m.group (3)
+        # If we have a file filter, check for file lines.
+    if file_filter:
+        match = bool(file_filter.search(filename))
+        # print(filename)
+        if match == InvertFilter:
+            return None, None, None, None
+
+    try:
+        added = int (m.group (1))
+        removed = int (m.group (2))
+    except ValueError:
+        # A binary file (image, etc.) is marked with '-'
+        added = removed = 0
+
+    if m := patterns['rename'].match(filename):
+        filename = f'{m.group(1)}{m.group(3)}{m.group(4)}'
+        if 'rename' not in ns:
+            ns['rename'] = 1
+        else:
+            ns['rename'] += 1
+
+    filetype = database.FileTypes.guess_file_type (os.path.basename(filename))
+    return filename, filetype, added, removed
 
 def is_botemail(email):
     global BotEmails
@@ -589,22 +585,11 @@ def GripeAboutAuthorName (name):
     GripedAuthorNames.append (name)
     print email_encode('%s is an author name, probably not what you want' % (name))
 
-def ApplyFileFilter (line, ignore):
-    #
-    # If this is the first file line (--- a/), set ignore one way
-    # or the other.
-    #
-    m = patterns['filea'].match (line)
-    if m:
+def ApplyFileFilter(line, ignore):
+    if m := patterns['filea'].match(line):
         file = m.group (1)
-        if FileFilter.search (file):
-            return 0
-        return 1
-    #
-    # For the second line, we can turn ignore off, but not on
-    #
-    m = patterns['fileb'].match (line)
-    if m:
+        return 0 if FileFilter.search (file) else 1
+    if m := patterns['fileb'].match(line):
         file = m.group (1)
         if FileFilter.search (file):
             return 0
@@ -618,8 +603,7 @@ def is_svntag(logpatch):
     """
 
     for Line in logpatch:
-        m = patterns['svn-tag'].match(Line.strip())
-        if m:
+        if m := patterns['svn-tag'].match(Line.strip()):
             sys.stderr.write ('(W) detected a commit on a svn tag: %s\n' %
                               (m.group (0),))
             return True

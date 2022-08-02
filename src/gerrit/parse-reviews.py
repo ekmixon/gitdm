@@ -27,7 +27,7 @@ class Reviewer:
     def __init__(self, username, name, email):
         self.username = username
         self.name = name
-        self.email = email if email else username_to_email_map.get(self.username)
+        self.email = email or username_to_email_map.get(self.username)
 
     @classmethod
     def parse(cls, r):
@@ -77,7 +77,11 @@ class Review:
         return cls(r['id'],
                    [PatchSet.parse(ps) for ps in r['patchSets']])
 
-reviews = [Review.parse(json.loads(l)) for l in sys.stdin if not 'runTimeMilliseconds' in l]
+reviews = [
+    Review.parse(json.loads(l))
+    for l in sys.stdin
+    if 'runTimeMilliseconds' not in l
+]
 
 def reviewers(review):
     ret = {}
@@ -88,10 +92,7 @@ def reviewers(review):
     return ret.values()
 
 def interesting(review):
-    for ps in r.patchsets:
-        if ps.revision in commits:
-            return True
-    return False
+    return any(ps.revision in commits for ps in r.patchsets)
 
 for r in reviews:
     if not interesting(r):

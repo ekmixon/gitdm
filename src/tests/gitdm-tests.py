@@ -114,12 +114,10 @@ class GitdmTests(unittest.TestCase):
     # Makes sure the files have the same content.
     #
     def assertFilesEqual(self, file1, file2):
-        f = open (file1, 'r')
-        file1_contents = f.read ()
-        f.close ()
-        f = open (file2, 'r')
-        file2_contents = f.read ()
-        f.close ()
+        with open (file1, 'r') as f:
+            file1_contents = f.read ()
+        with open (file2, 'r') as f:
+            file2_contents = f.read ()
         self.assertEqual (file1_contents, file2_contents,
                           "The files '" + file1 + "' and '" +
                           file2 + "' were not equal!")
